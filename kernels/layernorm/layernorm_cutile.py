@@ -58,17 +58,18 @@ def layernorm_fwd(X, W, B, Y, Mean, Rstd, eps, TILE_N: ConstInt):
 def export_layernorm_fwd(file_path: str):
     arr_dtype = ct.float32
     TILE_N = 4096
+    M, N = 1024, 4096
 
     ctc.export_kernel(
         kernel=layernorm_fwd,
         signatures=[ctc.KernelSignature(
             parameters=[
-                make_array_constraint(arr_dtype, 2),
-                make_array_constraint(arr_dtype, 1),
-                make_array_constraint(arr_dtype, 1),
-                make_array_constraint(arr_dtype, 2),
-                make_array_constraint(arr_dtype, 1),
-                make_array_constraint(arr_dtype, 1),
+                make_array_constraint(arr_dtype, 2, [N, 1]),
+                make_array_constraint(arr_dtype, 1, [1]),
+                make_array_constraint(arr_dtype, 1, [1]),
+                make_array_constraint(arr_dtype, 2, [N, 1]),
+                make_array_constraint(arr_dtype, 1, [1]),
+                make_array_constraint(arr_dtype, 1, [1]),
                 ctc.ScalarConstraint(dtype=ct.float32),
                 ctc.ConstantConstraint(TILE_N),
             ],

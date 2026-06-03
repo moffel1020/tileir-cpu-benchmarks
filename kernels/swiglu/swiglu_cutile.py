@@ -35,16 +35,17 @@ def swiglu_fwd(
 
 def export_swiglu_fwd(file_path: str):
     arr_dtype = ct.float32
-    row_size = 1024
+    H, W = 1024, 4096
+    row_size = 4096
 
     ctc.export_kernel(
         kernel=swiglu_fwd,
         signatures=[ctc.KernelSignature(
             parameters=[
-                make_array_constraint(arr_dtype, 2),
-                make_array_constraint(arr_dtype, 2),
-                make_array_constraint(arr_dtype, 2),
-                ctc.ConstantConstraint(row_size)
+                make_array_constraint(arr_dtype, 2, [W, 1]),
+                make_array_constraint(arr_dtype, 2, [W, 1]),
+                make_array_constraint(arr_dtype, 2, [W, 1]),
+                ctc.ConstantConstraint(W)
             ],
             calling_convention=ctc.CallingConvention().cutile_python_v1(),
             symbol="swiglu_fwd",

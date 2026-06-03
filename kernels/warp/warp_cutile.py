@@ -50,9 +50,9 @@ def export_warp(file_path: str):
         kernel=warp_kernel,
         signatures=[ctc.KernelSignature(
             parameters=[
-                make_array_constraint(ct.int8, 3),
+                make_array_constraint(ct.int8, 3, [H * W, W, 1]),
                 make_array_constraint(ct.int16, 2),
-                make_array_constraint(ct.int8, 3),
+                make_array_constraint(ct.int8, 3, [H * W, W, 1]),
                 ctc.ConstantConstraint(C),
                 ctc.ConstantConstraint(H),
                 ctc.ConstantConstraint(W),

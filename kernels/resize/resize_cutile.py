@@ -9,7 +9,7 @@ def resize_kernel(
     channel: ct.Constant[int],
     height: ct.Constant[int],
     width: ct.Constant[int],
-    BLOCK_SIZE_W: ct.Constant[int],
+    BLOCK_SIZE_W: ct.Constant[int], # TODO: not needed when using tiling
 ):
     pid_h = ct.bid(0)
     pid_c = ct.bid(1)
@@ -92,8 +92,8 @@ def export_resize(file_path: str):
         kernel=resize_kernel,
         signatures=[ctc.KernelSignature(
             parameters=[
-                make_array_constraint(ct.int8, 3),
-                make_array_constraint(ct.int8, 3),
+                make_array_constraint(ct.int8, 3, [H * W, W, 1]),
+                make_array_constraint(ct.int8, 3, [H * W * 2 * 2, W * 2, 1]),
                 ctc.ConstantConstraint(C),
                 ctc.ConstantConstraint(H),
                 ctc.ConstantConstraint(W),
