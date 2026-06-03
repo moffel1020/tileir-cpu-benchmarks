@@ -3,38 +3,40 @@ import cuda.tile.compilation as ctc
 from utils import make_array_constraint
 
 @ct.kernel
-def sharpen_3x3(src, out):
+def sharpen_3x3(src, out, W: ct.Constant[int]):
     h = ct.bid(0)
     c = ct.bid(1)
 
     # check_bounds defaults to true, so no explicit mask is needed like in triton
+    offsets = ct.arange(W, dtype=ct.int32)
+
     center = ct.gather(
         src,
-        (c, h, 0),
+        (c, h, offsets),
         padding_value=0,
     ).astype(ct.int16)
 
     up = ct.gather(
         src,
-        (c, h - 1, 0),
+        (c, h - 1, offsets),
         padding_value=0,
     ).astype(ct.int16)
 
     down = ct.gather(
         src,
-        (c, h + 1, 0),
+        (c, h + 1, offsets),
         padding_value=0,
     ).astype(ct.int16)
 
     left = ct.gather(
         src,
-        (c, h, -1),
+        (c, h, offsets-1),
         padding_value=0,
     ).astype(ct.int16)
 
     right = ct.gather(
         src,
-        (c, h, 1),
+        (c, h, offsets+1),
         padding_value=0,
     ).astype(ct.int16)
 
@@ -48,21 +50,20 @@ def sharpen_3x3(src, out):
 
     ct.scatter(
         out,
-        (c, h, 0),
+        (c, h, offsets),
         val,
     )
 
 def export_sharpen(file_path: str):
-
     C, H, W = 3, 512, 512
-    BLOCK_W = 128
 
     ctc.export_kernel(
         kernel=sharpen_3x3,
         signatures=[ctc.KernelSignature(
             parameters=[
-                make_array_constraint(ct.int8, 3),
-                make_array_constraint(ct.int8, 3),
+                make_array_constraint(ct.int8, 3, [H * W, W, 1]),
+                make_array_constraint(ct.int8, 3, [H * W, W, 1]),
+                ctc.ConstantConstraint(W),
             ],
             calling_convention=ctc.CallingConvention().cutile_python_v1(),
             symbol="sharpen_3x3",
