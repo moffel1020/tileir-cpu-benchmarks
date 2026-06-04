@@ -45,8 +45,8 @@ def sharpen_3x3(src, out, W: ct.Constant[int]):
     # 0 -1  0
     val = 5 * center - up - down - left - right
 
-    val = ct.minimum(ct.maximum(val, -128), 127)
-    val = val.astype(ct.int8)
+    val = ct.minimum(ct.maximum(val, 0), 255)
+    val = val.astype(ct.uint8)
 
     ct.scatter(
         out,
@@ -61,8 +61,8 @@ def export_sharpen(file_path: str):
         kernel=sharpen_3x3,
         signatures=[ctc.KernelSignature(
             parameters=[
-                make_array_constraint(ct.int8, 3, [H * W, W, 1]),
-                make_array_constraint(ct.int8, 3, [H * W, W, 1]),
+                make_array_constraint(ct.uint8, 3, [H * W, W, 1]),
+                make_array_constraint(ct.uint8, 3, [H * W, W, 1]),
                 ctc.ConstantConstraint(W),
             ],
             calling_convention=ctc.CallingConvention().cutile_python_v1(),

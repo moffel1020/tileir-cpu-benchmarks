@@ -2,7 +2,7 @@
 
 CUDA_TILE_OPT=/home/thomas/repos/cuda-tile-cpu/build/bin/cuda-tile-opt
 
-$CUDA_TILE_OPT \
+$CUDA_TILE_OPT -mlir-print-after-change\
     --canonicalize --cse \
     --convert-cuda-tile-to-standard \
     --canonicalize --cse \
@@ -46,12 +46,3 @@ $CUDA_TILE_OPT \
     --canonicalize --cse \
     --remove-dead-values \
     $1 -o $2
-
-#     --cuda-tile-cpu-tile-and-fuse-into-store="tile-sizes=16" \
-    # --linalg-fuse-elementwise-ops \ removed for layernorm
-
-# after fold elemwise ops:
-    # --canonicalize --cse \
-    # --linalg-fuse-elementwise-ops \
-    # --canonicalize --cse \
-    # --cuda-tile-cpu-tile-and-fuse-into-store="tile-sizes=16" \

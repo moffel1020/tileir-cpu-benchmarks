@@ -1,3 +1,5 @@
+#pragma once
+
 #include <algorithm>
 #include <omp.h>
 
@@ -5,7 +7,7 @@ static constexpr int16_t clamp_i16(int16_t x, int16_t lo, int16_t hi) {
   return std::max(lo, std::min(x, hi));
 }
 
-__attribute__((noinline)) void sharpen_3x3(int8_t *src_arr, int8_t *out_arr,
+__attribute__((noinline)) void sharpen_3x3(uint8_t *src_arr, uint8_t *out_arr,
                                           size_t channel, size_t height,
                                           size_t width) {
 #pragma omp parallel for collapse(2) schedule(static)
@@ -14,8 +16,8 @@ __attribute__((noinline)) void sharpen_3x3(int8_t *src_arr, int8_t *out_arr,
       size_t hm1 = (h == 0) ? 0 : h - 1;
       size_t hp1 = std::min(h + 1, height - 1);
 
-      int8_t *src_base = src_arr + c * height * width;
-      int8_t *out_base = out_arr + c * height * width;
+      uint8_t *src_base = src_arr + c * height * width;
+      uint8_t *out_base = out_arr + c * height * width;
 
 #pragma omp simd
       for (size_t w = 0; w < width; w++) {
@@ -29,9 +31,9 @@ __attribute__((noinline)) void sharpen_3x3(int8_t *src_arr, int8_t *out_arr,
         int16_t right = src_base[h * width + wp1];
 
         int16_t val = 5 * center - up - down - left - right;
-        val = clamp_i16(val, -128, 127);
+        val = clamp_i16(val, 0, 255);
 
-        out_base[h * width + w] = static_cast<int8_t>(val);
+        out_base[h * width + w] = static_cast<uint8_t>(val);
       }
     }
   }

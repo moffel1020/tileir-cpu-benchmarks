@@ -35,8 +35,7 @@ def swiglu_fwd(
 
 def export_swiglu_fwd(file_path: str):
     arr_dtype = ct.float32
-    H, W = 1024, 4096
-    row_size = 4096
+    H, W = 512, 1024
 
     ctc.export_kernel(
         kernel=swiglu_fwd,

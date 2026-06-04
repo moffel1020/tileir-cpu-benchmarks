@@ -68,12 +68,12 @@ def test_swiglu_fwd():
     return output
 
 def write_swiglu(file_path: str):
-    gate = torch.randn((1024, 4096), device="cpu", dtype=torch.float32)
-    up = torch.randn((1024, 4096), device="cpu", dtype=torch.float32)
+    gate = torch.randn((512, 1024), device="cpu", dtype=torch.float32)
+    up = torch.randn((512, 1024), device="cpu", dtype=torch.float32)
     output = torch.empty_like(gate)
 
-    TILE_SIZE = 4096
-    grid = (1024,)
+    TILE_SIZE = 1024
+    grid = (512,)
 
     _, n_cols = gate.shape
 

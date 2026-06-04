@@ -18,7 +18,7 @@ def _layer_norm_fwd_fused(
     Rstd,  # pointer to the 1/std
     stride,  # how much to increase the pointer when moving by 1 row
     N,  # number of columns in X
-    eps,  # epsilon to avoid division by zero
+    eps: tl.constexpr,  # epsilon to avoid division by zero
     BLOCK_SIZE: tl.constexpr,
 ):
     # Map the program id to the row of X and Y it should compute.

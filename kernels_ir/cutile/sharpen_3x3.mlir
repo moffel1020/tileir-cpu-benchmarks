@@ -48,7 +48,7 @@ cuda_tile.module @kernels {
     %reshape_22 = reshape %cst_0_i8 : tile<i8> -> tile<1xi8>
     %bcast_23 = broadcast %reshape_22 : tile<1xi8> -> tile<512xi8>
     %result, %result_token = load_ptr_tko weak %17, %15, %bcast_23 token=%0 : tile<512xptr<i8>>, tile<512xi1>, tile<512xi8> -> tile<512xi8>, token
-    %18 = exti %result signed : tile<512xi8> -> tile<512xi16>
+    %18 = exti %result unsigned : tile<512xi8> -> tile<512xi16>
     %cst_1_i32 = constant <i32: 1> : tile<i32>
     %19 = subi %blockId_x, %cst_1_i32 : tile<i32>
     %20 = exti %blockId_y_6 signed : tile<i32> -> tile<i64>
@@ -89,7 +89,7 @@ cuda_tile.module @kernels {
     %reshape_43 = reshape %cst_0_i8_42 : tile<i8> -> tile<1xi8>
     %bcast_44 = broadcast %reshape_43 : tile<1xi8> -> tile<512xi8>
     %result_45, %result_token_46 = load_ptr_tko weak %35, %33, %bcast_44 token=%0 : tile<512xptr<i8>>, tile<512xi1>, tile<512xi8> -> tile<512xi8>, token
-    %36 = exti %result_45 signed : tile<512xi8> -> tile<512xi16>
+    %36 = exti %result_45 unsigned : tile<512xi8> -> tile<512xi16>
     %cst_1_i32_47 = constant <i32: 1> : tile<i32>
     %37 = addi %blockId_x, %cst_1_i32_47 : tile<i32>
     %38 = exti %blockId_y_6 signed : tile<i32> -> tile<i64>
@@ -130,7 +130,7 @@ cuda_tile.module @kernels {
     %reshape_67 = reshape %cst_0_i8_66 : tile<i8> -> tile<1xi8>
     %bcast_68 = broadcast %reshape_67 : tile<1xi8> -> tile<512xi8>
     %result_69, %result_token_70 = load_ptr_tko weak %53, %51, %bcast_68 token=%0 : tile<512xptr<i8>>, tile<512xi1>, tile<512xi8> -> tile<512xi8>, token
-    %54 = exti %result_69 signed : tile<512xi8> -> tile<512xi16>
+    %54 = exti %result_69 unsigned : tile<512xi8> -> tile<512xi16>
     %cst_1_i32_71 = constant <i32: 1> : tile<i32>
     %reshape_72 = reshape %cst_1_i32_71 : tile<i32> -> tile<1xi32>
     %bcast_73 = broadcast %reshape_72 : tile<1xi32> -> tile<512xi32>
@@ -173,7 +173,7 @@ cuda_tile.module @kernels {
     %reshape_93 = reshape %cst_0_i8_92 : tile<i8> -> tile<1xi8>
     %bcast_94 = broadcast %reshape_93 : tile<1xi8> -> tile<512xi8>
     %result_95, %result_token_96 = load_ptr_tko weak %71, %69, %bcast_94 token=%0 : tile<512xptr<i8>>, tile<512xi1>, tile<512xi8> -> tile<512xi8>, token
-    %72 = exti %result_95 signed : tile<512xi8> -> tile<512xi16>
+    %72 = exti %result_95 unsigned : tile<512xi8> -> tile<512xi16>
     %cst_1_i32_97 = constant <i32: 1> : tile<i32>
     %reshape_98 = reshape %cst_1_i32_97 : tile<i32> -> tile<1xi32>
     %bcast_99 = broadcast %reshape_98 : tile<1xi32> -> tile<512xi32>
@@ -216,7 +216,7 @@ cuda_tile.module @kernels {
     %reshape_119 = reshape %cst_0_i8_118 : tile<i8> -> tile<1xi8>
     %bcast_120 = broadcast %reshape_119 : tile<1xi8> -> tile<512xi8>
     %result_121, %result_token_122 = load_ptr_tko weak %89, %87, %bcast_120 token=%0 : tile<512xptr<i8>>, tile<512xi1>, tile<512xi8> -> tile<512xi8>, token
-    %90 = exti %result_121 signed : tile<512xi8> -> tile<512xi16>
+    %90 = exti %result_121 unsigned : tile<512xi8> -> tile<512xi16>
     %cst_5_i16 = constant <i16: 5> : tile<i16>
     %reshape_123 = reshape %cst_5_i16 : tile<i16> -> tile<1xi16>
     %bcast_124 = broadcast %reshape_123 : tile<1xi16> -> tile<512xi16>
@@ -225,12 +225,12 @@ cuda_tile.module @kernels {
     %93 = subi %92, %54 : tile<512xi16>
     %94 = subi %93, %72 : tile<512xi16>
     %95 = subi %94, %90 : tile<512xi16>
-    %cst_-128_i16 = constant <i16: -128> : tile<i16>
-    %reshape_125 = reshape %cst_-128_i16 : tile<i16> -> tile<1xi16>
+    %cst_0_i16 = constant <i16: 0> : tile<i16>
+    %reshape_125 = reshape %cst_0_i16 : tile<i16> -> tile<1xi16>
     %bcast_126 = broadcast %reshape_125 : tile<1xi16> -> tile<512xi16>
     %96 = maxi %95, %bcast_126 signed : tile<512xi16>
-    %cst_127_i16 = constant <i16: 127> : tile<i16>
-    %reshape_127 = reshape %cst_127_i16 : tile<i16> -> tile<1xi16>
+    %cst_255_i16 = constant <i16: 255> : tile<i16>
+    %reshape_127 = reshape %cst_255_i16 : tile<i16> -> tile<1xi16>
     %bcast_128 = broadcast %reshape_127 : tile<1xi16> -> tile<512xi16>
     %97 = mini %96, %bcast_128 signed : tile<512xi16>
     %98 = trunci %97 : tile<512xi16> -> tile<512xi8>

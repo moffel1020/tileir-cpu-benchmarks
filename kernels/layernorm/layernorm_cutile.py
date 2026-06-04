@@ -9,7 +9,7 @@ ConstInt = ct.Constant[int]
 PAD_ZERO = ct.PaddingMode.ZERO
 
 @ct.kernel
-def layernorm_fwd(X, W, B, Y, Mean, Rstd, eps, TILE_N: ConstInt):
+def layernorm_fwd(X, W, B, Y, Mean, Rstd, eps: ct.Constant[float], TILE_N: ConstInt):
     """
     Forward pass: computes mean/var, normalizes input, and applies affine transform.
 
@@ -59,6 +59,7 @@ def export_layernorm_fwd(file_path: str):
     arr_dtype = ct.float32
     TILE_N = 4096
     M, N = 1024, 4096
+    eps = 1e-5
 
     ctc.export_kernel(
         kernel=layernorm_fwd,
@@ -70,7 +71,7 @@ def export_layernorm_fwd(file_path: str):
                 make_array_constraint(arr_dtype, 2, [N, 1]),
                 make_array_constraint(arr_dtype, 1, [1]),
                 make_array_constraint(arr_dtype, 1, [1]),
-                ctc.ScalarConstraint(dtype=ct.float32),
+                ctc.ConstantConstraint(eps),
                 ctc.ConstantConstraint(TILE_N),
             ],
             calling_convention=ctc.CallingConvention().cutile_python_v1(),

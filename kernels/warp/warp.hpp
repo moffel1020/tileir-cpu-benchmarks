@@ -1,3 +1,5 @@
+#pragma once
+
 #include <omp.h>
 
 __attribute__((noinline)) void warp(int8_t *src_arr, int16_t *offset_arr,

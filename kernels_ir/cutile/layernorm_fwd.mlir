@@ -1,5 +1,5 @@
 cuda_tile.module @kernels {
-  entry @layernorm_fwd(%arg0: tile<ptr<f32>>, %arg1: tile<i32>, %arg2: tile<i32>, %arg3: tile<i32>, %arg4: tile<i32>, %arg5: tile<ptr<f32>>, %arg6: tile<i32>, %arg7: tile<i32>, %arg8: tile<ptr<f32>>, %arg9: tile<i32>, %arg10: tile<i32>, %arg11: tile<ptr<f32>>, %arg12: tile<i32>, %arg13: tile<i32>, %arg14: tile<i32>, %arg15: tile<i32>, %arg16: tile<ptr<f32>>, %arg17: tile<i32>, %arg18: tile<i32>, %arg19: tile<ptr<f32>>, %arg20: tile<i32>, %arg21: tile<i32>, %arg22: tile<f32>) optimization_hints=<sm_89 = {}> {
+  entry @layernorm_fwd(%arg0: tile<ptr<f32>>, %arg1: tile<i32>, %arg2: tile<i32>, %arg3: tile<i32>, %arg4: tile<i32>, %arg5: tile<ptr<f32>>, %arg6: tile<i32>, %arg7: tile<i32>, %arg8: tile<ptr<f32>>, %arg9: tile<i32>, %arg10: tile<i32>, %arg11: tile<ptr<f32>>, %arg12: tile<i32>, %arg13: tile<i32>, %arg14: tile<i32>, %arg15: tile<i32>, %arg16: tile<ptr<f32>>, %arg17: tile<i32>, %arg18: tile<i32>, %arg19: tile<ptr<f32>>, %arg20: tile<i32>, %arg21: tile<i32>) optimization_hints=<sm_89 = {}> {
     %0 = make_token : token
     %assume = assume bounded<0, ?>, %arg1 : tile<i32>
     %assume_0 = assume bounded<0, ?>, %arg2 : tile<i32>
@@ -15,6 +15,7 @@ cuda_tile.module @kernels {
     %tview_9 = make_tensor_view %arg16, shape = [%assume_8], strides = [1] : tile<i32> -> tensor_view<?xf32, strides=[1]>
     %assume_10 = assume bounded<0, ?>, %arg20 : tile<i32>
     %tview_11 = make_tensor_view %arg19, shape = [%assume_10], strides = [1] : tile<i32> -> tensor_view<?xf32, strides=[1]>
+    %cst_f32 = constant <f32: 9.99999974E-6> : tile<f32>
     %cst_4096_i32 = constant <i32: 4096> : tile<i32>
     %blockId_x, %blockId_y, %blockId_z = get_tile_block_id : tile<i32>
     %pview = make_partition_view %tview : partition_view<tile=(1x4096), tensor_view<?x?xf32, strides=[4096,1]>>
@@ -75,7 +76,7 @@ cuda_tile.module @kernels {
     %6 = itof %assume_0 signed  : tile<i32> -> tile<f32>
     %reshape_26 = reshape %6 : tile<f32> -> tile<1xf32>
     %7 = divf %reduce_25, %reshape_26  : tile<1xf32>
-    %reshape_27 = reshape %arg22 : tile<f32> -> tile<1xf32>
+    %reshape_27 = reshape %cst_f32 : tile<f32> -> tile<1xf32>
     %8 = addf %7, %reshape_27  : tile<1xf32>
     %9 = sqrt %8  : tile<1xf32>
     %cst_1_f32 = constant <f32: 1.000000e+00> : tile<f32>

@@ -4,6 +4,8 @@
 #include <omp.h>
 #include <random>
 
+#include "../../support/support.hpp"
+
 #define LAUNCH_CUTILE
 
 #if defined(LAUNCH_CPP)
@@ -35,8 +37,7 @@ int main() {
   std::mt19937 gen(rd());
   std::uniform_real_distribution<float> dist(0.0f, 10.0f);
   std::generate(input.begin(), input.end(), [&]() { return dist(gen); });
-  std::iota(input.begin(), input.end(), 0);
-  // std::fill(input.begin(), input.end(), 1);
+  // std::iota(input.begin(), input.end(), 0);
 
   std::fill(output.begin(), output.end(), 0);
 
@@ -46,7 +47,7 @@ int main() {
 
 #ifdef LAUNCH_TRITON
 
-  constexpr size_t GRID_X = 16;
+  constexpr size_t GRID_X = N_ROWS;
   constexpr size_t GRID_Y = 1;
   constexpr size_t GRID_Z = 1;
 
@@ -63,20 +64,18 @@ int main() {
 #endif
 
 #ifdef LAUNCH_CUTILE
-  softmax_per_row(input.data(), N_ROWS, N_COLS, 1, N_ROWS, output.data(),
-                  N_ROWS, N_COLS, 1, N_ROWS, 16, 1, 1);
+  constexpr size_t GRID_X = N_ROWS;
+  constexpr size_t GRID_Y = 1;
+  constexpr size_t GRID_Z = 1;
+
+  softmax_per_row(input.data(), N_ROWS, N_COLS, N_COLS, 1, output.data(),
+                  N_ROWS, N_COLS, N_COLS, 1, GRID_X, GRID_Y, GRID_Z);
 #endif
 
 #if 1
-  for (auto v : input) {
-    std::cout << v << ' ';
-  }
-
+  print_array(input);
   std::cout << "\n\n";
-
-  for (auto v : output) {
-    std::cout << v << ", ";
-  }
-  std::cout << "\n";
+  print_array(input);
+  std::cout << "\n\n";
 #endif
 }
