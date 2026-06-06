@@ -5,7 +5,8 @@
 
 #include "../../support/support.hpp"
 
-#define LAUNCH_CPP
+#define PRINT_STATS
+#define LAUNCH_CUTILE
 
 #if defined(LAUNCH_CPP)
 #include "sharpen.hpp"
@@ -27,6 +28,8 @@ extern "C" void sharpen_3x3(uint8_t *in, uint32_t sizeI1, uint32_t sizeI2,
 
 #endif
 
+constexpr size_t N_REPEAT = 100;
+
 constexpr size_t C = 3;
 constexpr size_t H = 512;
 constexpr size_t W = 512;
@@ -45,36 +48,43 @@ int main() {
   std::fill(out.begin(), out.end(), 0);
 
 #ifdef LAUNCH_CPP
-  sharpen_3x3(in.data(), out.data(), C, H, W);
+  auto times = benchmark<N_REPEAT>(
+      [&]() noexcept { sharpen_3x3(in.data(), out.data(), C, H, W); });
 #endif
 
 #ifdef LAUNCH_TRITON
-  constexpr size_t GRID_X = H;
-  constexpr size_t GRID_Y = C;
-  constexpr size_t GRID_Z = W;
+  auto times = benchmark<N_REPEAT>([&]() noexcept {
+    constexpr size_t GRID_X = H;
+    constexpr size_t GRID_Y = C;
+    constexpr size_t GRID_Z = W;
 
 #pragma omp parallel for collapse(3) schedule(static)
-  for (size_t z = 0; z < GRID_Z; z++) {
-    for (size_t y = 0; y < GRID_Y; y++) {
-      for (size_t x = 0; x < GRID_X; x++) {
-        sharpen_3x3_kernel(in.data(), out.data(), x, y, z, GRID_X, GRID_Y,
-                           GRID_Z);
+    for (size_t z = 0; z < GRID_Z; z++) {
+      for (size_t y = 0; y < GRID_Y; y++) {
+        for (size_t x = 0; x < GRID_X; x++) {
+          sharpen_3x3_kernel(in.data(), out.data(), x, y, z, GRID_X, GRID_Y,
+                             GRID_Z);
+        }
       }
     }
-  }
+  });
 #endif
 
 #ifdef LAUNCH_CUTILE
-  constexpr size_t GRID_X = H;
-  constexpr size_t GRID_Y = C;
-  constexpr size_t GRID_Z = 1;
-
-  sharpen_3x3(in.data(), C, H, W, H * W, W, 1, out.data(), C, H, W, H * W, W, 1,
-              GRID_X, GRID_Y, GRID_Z);
-
+  auto times = benchmark<N_REPEAT>([&]() noexcept {
+    constexpr size_t GRID_X = H;
+    constexpr size_t GRID_Y = C;
+    constexpr size_t GRID_Z = 1;
+    sharpen_3x3(in.data(), C, H, W, H * W, W, 1, out.data(), C, H, W, H * W, W,
+                1, GRID_X, GRID_Y, GRID_Z);
+  });
 #endif
 
-#if 1
+#ifdef PRINT_STATS
+  printStats(times);
+#endif
+
+#if 0
   print_array(in, 100);
   std::cout << "\n\n";
   print_array(out, 100);

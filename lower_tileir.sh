@@ -9,6 +9,8 @@ $CUDA_TILE_OPT \
     --convert-elementwise-to-linalg \
     --linalg-fold-into-elementwise \
     --canonicalize --cse \
+    --cuda-tile-cpu-tile-and-fuse-into-store="tile-sizes=32" \
+    --canonicalize --cse \
     --eliminate-empty-tensors \
     --cuda-tile-cpu-vectorize-linalg \
     --canonicalize --cse \

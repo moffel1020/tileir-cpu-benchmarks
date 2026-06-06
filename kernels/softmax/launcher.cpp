@@ -6,6 +6,7 @@
 
 #include "../../support/support.hpp"
 
+#define PRINT_STATS
 #define LAUNCH_CUTILE
 
 #if defined(LAUNCH_CPP)
@@ -26,6 +27,8 @@ extern "C" void softmax_per_row(float *A, int sizeA1, int sizeA2, int stideA1,
 
 #endif
 
+constexpr size_t N_REPEAT = 100;
+
 constexpr int N_COLS = 16;
 constexpr int N_ROWS = 16;
 
@@ -42,37 +45,46 @@ int main() {
   std::fill(output.begin(), output.end(), 0);
 
 #ifdef LAUNCH_CPP
-  softmax_per_row(input.data(), output.data(), N_ROWS, N_COLS);
+  auto times = benchmark<N_REPEAT>([&]() noexcept {
+    softmax_per_row(input.data(), output.data(), N_ROWS, N_COLS);
+  });
 #endif
 
 #ifdef LAUNCH_TRITON
-
-  constexpr size_t GRID_X = N_ROWS;
-  constexpr size_t GRID_Y = 1;
-  constexpr size_t GRID_Z = 1;
+  auto times = benchmark<N_REPEAT>([&]() noexcept {
+    constexpr size_t GRID_X = N_ROWS;
+    constexpr size_t GRID_Y = 1;
+    constexpr size_t GRID_Z = 1;
 
 #pragma omp parallel for collapse(3) schedule(static)
-  for (size_t z = 0; z < GRID_Z; z++) {
-    for (size_t y = 0; y < GRID_Y; y++) {
-      for (size_t x = 0; x < GRID_X; x++) {
-        softmax_per_row_triton(input.data(), output.data(), x, y, z, GRID_X,
-                               GRID_Y, GRID_Z);
+    for (size_t z = 0; z < GRID_Z; z++) {
+      for (size_t y = 0; y < GRID_Y; y++) {
+        for (size_t x = 0; x < GRID_X; x++) {
+          softmax_per_row_triton(input.data(), output.data(), x, y, z, GRID_X,
+                                 GRID_Y, GRID_Z);
+        }
       }
     }
-  }
+  });
 
 #endif
 
 #ifdef LAUNCH_CUTILE
-  constexpr size_t GRID_X = N_ROWS;
-  constexpr size_t GRID_Y = 1;
-  constexpr size_t GRID_Z = 1;
+  auto times = benchmark<N_REPEAT>([&]() noexcept {
+    constexpr size_t GRID_X = N_ROWS;
+    constexpr size_t GRID_Y = 1;
+    constexpr size_t GRID_Z = 1;
 
-  softmax_per_row(input.data(), N_ROWS, N_COLS, N_COLS, 1, output.data(),
-                  N_ROWS, N_COLS, N_COLS, 1, GRID_X, GRID_Y, GRID_Z);
+    softmax_per_row(input.data(), N_ROWS, N_COLS, N_COLS, 1, output.data(),
+                    N_ROWS, N_COLS, N_COLS, 1, GRID_X, GRID_Y, GRID_Z);
+  });
 #endif
 
-#if 1
+#ifdef PRINT_STATS
+  printStats(times);
+#endif
+
+#if 0
   print_array(input);
   std::cout << "\n\n";
   print_array(input);

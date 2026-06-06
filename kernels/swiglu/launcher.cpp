@@ -6,6 +6,7 @@
 #include "../../support/support.hpp"
 
 #define LAUNCH_CUTILE
+#define PRINT_STATS
 
 #if defined(LAUNCH_CPP)
 #include "swiglu.hpp"
@@ -25,11 +26,12 @@ extern "C" void swiglu_fwd(float *gate, int sizeG1, int sizeG2, int strideG1,
                            uint64_t gridX, uint64_t gridY, uint64_t gridZ);
 #endif
 
+constexpr size_t N_REPEAT = 100;
+
 constexpr size_t H = 512;
 constexpr size_t W = 1024;
 
 int main() {
-
   std::array<float, H * W> gate;
   std::array<float, H * W> up;
   std::array<float, H * W> out;
@@ -43,34 +45,42 @@ int main() {
   std::fill(out.begin(), out.end(), 0);
 
 #ifdef LAUNCH_CPP
-  swiglu_fwd(gate.data(), up.data(), out.data(), H, W);
+  auto times = benchmark<N_REPEAT>(
+      [&]() noexcept { swiglu_fwd(gate.data(), up.data(), out.data(), H, W); });
 #endif
 
 #ifdef LAUNCH_TRITON
-  constexpr size_t GRID_X = H;
-  constexpr size_t GRID_Y = 1;
-  constexpr size_t GRID_Z = 1;
+  auto times = benchmark<N_REPEAT>([&]() noexcept {
+    constexpr size_t GRID_X = H;
+    constexpr size_t GRID_Y = 1;
+    constexpr size_t GRID_Z = 1;
 
 #pragma omp parallel for collapse(3) schedule(static)
-  for (size_t z = 0; z < GRID_Z; z++) {
-    for (size_t y = 0; y < GRID_Y; y++) {
-      for (size_t x = 0; x < GRID_X; x++) {
-        swiglu_fwd_triton(gate.data(), up.data(), out.data(), H, x, y, z,
-                          GRID_X, GRID_Y, GRID_Z);
+    for (size_t z = 0; z < GRID_Z; z++) {
+      for (size_t y = 0; y < GRID_Y; y++) {
+        for (size_t x = 0; x < GRID_X; x++) {
+          swiglu_fwd_triton(gate.data(), up.data(), out.data(), H, x, y, z,
+                            GRID_X, GRID_Y, GRID_Z);
+        }
       }
     }
-  }
+  });
 
 #endif
 
 #ifdef LAUNCH_CUTILE
-  constexpr size_t GRID_X = H;
-  constexpr size_t GRID_Y = 1;
-  constexpr size_t GRID_Z = 1;
+  auto times = benchmark<N_REPEAT>([&]() noexcept {
+    constexpr size_t GRID_X = H;
+    constexpr size_t GRID_Y = 1;
+    constexpr size_t GRID_Z = 1;
 
-  swiglu_fwd(gate.data(), H, W, W, 1, up.data(), H, W, W, 1, out.data(), H, W,
-             W, 1, GRID_X, GRID_Y, GRID_Z);
+    swiglu_fwd(gate.data(), H, W, W, 1, up.data(), H, W, W, 1, out.data(), H, W,
+               W, 1, GRID_X, GRID_Y, GRID_Z);
+  });
+#endif
 
+#ifdef PRINT_STATS
+  printStats(times);
 #endif
 
 #if 1

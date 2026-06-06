@@ -2,10 +2,10 @@
 #include <array>
 #include <omp.h>
 #include <random>
-#include <math.h>
 
 #include "../../support/support.hpp"
 
+#define PRINT_STATS
 #define LAUNCH_CUTILE
 
 #if defined(LAUNCH_CPP)
@@ -30,6 +30,8 @@ extern "C" void layernorm_fwd(float *X, int sizeX1, int sizeX2, int strideX1,
                               uint64_t gridZ);
 #endif
 
+constexpr size_t N_REPEAT = 100;
+
 constexpr size_t M = 1024;
 constexpr size_t N = 4096;
 
@@ -50,38 +52,48 @@ int main() {
   std::fill(rstd.begin(), rstd.end(), 0);
 
 #ifdef LAUNCH_CPP
-  layernorm_forward(Y.data(), mean.data(), rstd.data(), X.data(), W.data(),
-                    B.data(), M, N);
+  auto times = benchmark<N_REPEAT>([&]() noexcept {
+    layernorm_forward(Y.data(), mean.data(), rstd.data(), X.data(), W.data(),
+                      B.data(), M, N);
+  });
 #endif
 
 #ifdef LAUNCH_TRITON
-  constexpr uint32_t GRID_X = M;
-  constexpr uint32_t GRID_Y = 1;
-  constexpr uint32_t GRID_Z = 1;
+  auto times = benchmark<N_REPEAT>([&]() noexcept {
+    constexpr uint32_t GRID_X = M;
+    constexpr uint32_t GRID_Y = 1;
+    constexpr uint32_t GRID_Z = 1;
 
 #pragma omp parallel for collapse(3) schedule(static)
-  for (size_t z = 0; z < GRID_Z; z++) {
-    for (size_t y = 0; y < GRID_Y; y++) {
-      for (size_t x = 0; x < GRID_X; x++) {
-        _layer_norm_fwd_fused(X.data(), Y.data(), W.data(), B.data(),
-                              mean.data(), rstd.data(), 1, N, x, y, z, GRID_X,
-                              GRID_Y, GRID_Z);
+    for (size_t z = 0; z < GRID_Z; z++) {
+      for (size_t y = 0; y < GRID_Y; y++) {
+        for (size_t x = 0; x < GRID_X; x++) {
+          _layer_norm_fwd_fused(X.data(), Y.data(), W.data(), B.data(),
+                                mean.data(), rstd.data(), 1, N, x, y, z, GRID_X,
+                                GRID_Y, GRID_Z);
+        }
       }
     }
-  }
+  });
 #endif
 
 #ifdef LAUNCH_CUTILE
-  constexpr uint64_t GRID_X = M;
-  constexpr uint64_t GRID_Y = 1;
-  constexpr uint64_t GRID_Z = 1;
+  auto times = benchmark<N_REPEAT>([&]() noexcept {
+    constexpr uint64_t GRID_X = M;
+    constexpr uint64_t GRID_Y = 1;
+    constexpr uint64_t GRID_Z = 1;
 
-  layernorm_fwd(X.data(), M, N, N, 1, W.data(), N, 1, B.data(), N, 1, Y.data(),
-                M, N, N, 1, mean.data(), M, 1, rstd.data(), M, 1, GRID_X,
-                GRID_Y, GRID_Z);
+    layernorm_fwd(X.data(), M, N, N, 1, W.data(), N, 1, B.data(), N, 1,
+                  Y.data(), M, N, N, 1, mean.data(), M, 1, rstd.data(), M, 1,
+                  GRID_X, GRID_Y, GRID_Z);
+  });
 #endif
 
-#if 1
+#ifdef PRINT_STATS
+  printStats(times);
+#endif
+
+#if 0
   print_array(Y, 100);
   std::cout << "\n\n";
   print_array(mean, 100);
