@@ -32,9 +32,9 @@ constexpr size_t H = 512;
 constexpr size_t W = 1024;
 
 int main() {
-  std::array<float, H * W> gate;
-  std::array<float, H * W> up;
-  std::array<float, H * W> out;
+  static std::array<float, H * W> gate;
+  static std::array<float, H * W> up;
+  static std::array<float, H * W> out;
 
   std::random_device rd;
   std::mt19937 gen(rd());
@@ -65,7 +65,6 @@ int main() {
       }
     }
   });
-
 #endif
 
 #ifdef LAUNCH_CUTILE
@@ -73,7 +72,6 @@ int main() {
     constexpr size_t GRID_X = H;
     constexpr size_t GRID_Y = 1;
     constexpr size_t GRID_Z = 1;
-
     swiglu_fwd(gate.data(), H, W, W, 1, up.data(), H, W, W, 1, out.data(), H, W,
                W, 1, GRID_X, GRID_Y, GRID_Z);
   });
@@ -83,7 +81,7 @@ int main() {
   printStats(times);
 #endif
 
-#if 1
+#if 0
   print_array(out, 10);
   std::cout << "\n";
 #endif

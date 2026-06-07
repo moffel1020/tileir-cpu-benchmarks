@@ -87,8 +87,8 @@ def warp(src_arr, offset_arr, out_arr):
     print(kernel.asm["ttir"])
 
 def write_warp(file_path: str):
-    C, H, W = 3, 512, 512
-    BLOCK_SIZE = 128
+    C, H, W = 3, 2048, 2048
+    BLOCK_SIZE = 16
 
     src = torch.ones((C, H, W), dtype=torch.int8, device='cpu')
     offset = torch.zeros((H, W), dtype=torch.int16, device='cpu')  # Example offset values

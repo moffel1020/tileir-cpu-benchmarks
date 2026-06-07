@@ -77,7 +77,7 @@ def sharpen3x3(src: torch.Tensor, block_w: int = 128):
 
 def write_sharpen_3x3(file_path: str):
     C, H, W = 3, 512, 512
-    BLOCK_W = 512
+    BLOCK_W = 16
 
     src = torch.ones((C, H, W), device="cpu", dtype=torch.int8)
     out = torch.empty_like(src)

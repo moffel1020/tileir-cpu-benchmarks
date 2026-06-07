@@ -32,22 +32,18 @@ def resize_kernel(
     for off in range(0, width * 2, BLOCK_SIZE_W):
         w_idx = off + ct.arange(BLOCK_SIZE_W, dtype=ct.int32)
 
-        mask = w_idx < dst_width
-
         input_x = w_idx << (hw_fl - 1)
         x0 = input_x >> hw_fl
 
         y0x0 = ct.gather(
             src_ptr,
             (pid_c, y0, x0),
-            mask=mask,
             padding_value=0,
         ).astype(ct.int16)
 
         y1x0 = ct.gather(
             src_ptr,
             (pid_c, y1, x0),
-            mask=mask,
             padding_value=0,
         ).astype(ct.int16)
 
@@ -56,14 +52,12 @@ def resize_kernel(
         y0x1 = ct.gather(
             src_ptr,
             (pid_c, y0, x1),
-            mask=mask,
             padding_value=0,
         ).astype(ct.int16)
 
         y1x1 = ct.gather(
             src_ptr,
             (pid_c, y1, x1),
-            mask=mask,
             padding_value=0,
         ).astype(ct.int16)
 
@@ -80,13 +74,11 @@ def resize_kernel(
             out_ptr,
             (pid_c, h_idx, w_idx),
             sum_,
-            mask=mask,
-            check_bounds=True,
         )
 
 def export_resize(file_path: str):
     C, H, W = 3, 512, 512
-    BLOCK_SIZE = 64
+    BLOCK_SIZE = 16
 
     ctc.export_kernel(
         kernel=resize_kernel,

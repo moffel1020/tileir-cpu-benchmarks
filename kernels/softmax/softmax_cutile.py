@@ -46,8 +46,8 @@ def export_softmax_1d(file_path: str):
 
 def export_softmax_per_row(file_path: str):
     arr_dtype = ct.float32
-    n_rows = 16
-    n_cols = 16
+    n_rows = 512
+    n_cols = 1024
 
     ctc.export_kernel(
         kernel=softmax_per_row,

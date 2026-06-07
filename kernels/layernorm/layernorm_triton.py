@@ -191,7 +191,7 @@ class LayerNorm(torch.autograd.Function):
 
 def write_layernorm_fwd(file_path: str):
     M, N = 1024, 4096
-    BLOCK_SIZE = 4096
+    BLOCK_SIZE = 32
 
     x = torch.ones((M, N), device='cpu', dtype=torch.float32)
     w = torch.ones((N,), device='cpu', dtype=torch.float32)

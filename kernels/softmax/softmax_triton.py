@@ -4,14 +4,47 @@ import torch
 
 triton.runtime.driver.set_active_to_cpu() 
 
+# @triton.jit
+# def softmax_per_row_triton(input_ptr, output_ptr, input_row_stride: tl.constexpr, output_row_stride: tl.constexpr, num_rows, n_cols, BLOCK_SIZE: tl.constexpr):
+#     # The rows of the softmax are independent, so we parallelize across those
+#     row_idx = tl.program_id(0)
+#     # The stride represents how much we need to increase the pointer to advance 1 row
+#     row_start_ptr = input_ptr + row_idx * input_row_stride
+
+#     row_max = -float('inf')
+#     for off in range(0, n_cols, BLOCK_SIZE):
+#         col_offsets = off + tl.arange(0, BLOCK_SIZE)
+#         row = tl.load(row_start_ptr + col_offsets, mask=col_offsets < n_cols, other=-float('inf'))
+#         row_max = tl.maximum(row_max, tl.max(row, axis=0))
+
+#     # Write back output to DRAM
+#     output_row_start_ptr = output_ptr + row_idx * output_row_stride
+#     denominator = 0.0
+#     for off in range(0, n_cols):
+#         row = tl.load(row_start_ptr + off)
+#         # Subtract maximum for numerical stability
+#         row_minus_max = row - row_max
+#         # Note that exponentiation in Triton is fast but approximate (i.e., think __expf in CUDA)
+#         numerator = tl.exp(row_minus_max)
+#         denominator += numerator
+
+#         tl.store(output_row_start_ptr + off, numerator)
+
+#     for off in range(0, n_cols, BLOCK_SIZE):
+#         col_offsets = off + tl.arange(0, BLOCK_SIZE)
+#         row = tl.load(output_row_start_ptr + col_offsets, mask=col_offsets < n_cols, other=-float('inf'))
+
+#         softmax_output = row / denominator
+#         tl.store(output_row_start_ptr + col_offsets, softmax_output, mask=col_offsets < n_cols)
+
 @triton.jit
 def softmax_per_row_triton(
     input_ptr,
     output_ptr,
     input_row_stride: tl.constexpr,
     output_row_stride: tl.constexpr,
-    num_rows: tl.constexpr, # TODO: these are dynamic in cutile, maybe do the same here?
-    num_cols: tl.constexpr,
+    num_rows,
+    num_cols,
     BLOCK_SIZE: tl.constexpr,
 ):
     bidx = tl.program_id(0)
@@ -44,8 +77,8 @@ def softmax(x, y=None):
     if y is None:
         y = torch.empty_like(x)
 
-    num_rows = 128
-    num_cols = 128
+    num_rows = 512
+    num_cols = 2048
     grid = (num_rows,)
 
     BLOCK_SIZE = triton.next_power_of_2(num_cols)
@@ -68,22 +101,20 @@ def softmax(x, y=None):
     return y
 
 def write_softmax_per_row(file_path: str):
-    n_rows = 16
-    n_cols = 16
+    n_rows = 512
+    n_cols = 1024
 
     x = torch.ones((n_rows, n_cols), device='cpu', dtype=torch.float32)
     y = torch.empty_like(x)
     grid = (n_rows,)
 
     BLOCK_SIZE = triton.next_power_of_2(n_cols)
+    # BLOCK_SIZE = 32
 
     kernel = softmax_per_row_triton[grid](
         x, y, x.stride(0), y.stride(0), n_rows, n_cols, BLOCK_SIZE
     )
 
-    print(x)
-    print(BLOCK_SIZE)
-    print(y)
 
     with open(file_path, "w") as f:
         f.write(kernel.asm["ttir"])

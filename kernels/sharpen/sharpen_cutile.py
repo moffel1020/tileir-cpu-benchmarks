@@ -13,31 +13,26 @@ def sharpen_3x3(src, out, W: ct.Constant[int]):
     center = ct.gather(
         src,
         (c, h, offsets),
-        padding_value=0,
     ).astype(ct.int16)
 
     up = ct.gather(
         src,
         (c, h - 1, offsets),
-        padding_value=0,
     ).astype(ct.int16)
 
     down = ct.gather(
         src,
         (c, h + 1, offsets),
-        padding_value=0,
     ).astype(ct.int16)
 
     left = ct.gather(
         src,
         (c, h, offsets-1),
-        padding_value=0,
     ).astype(ct.int16)
 
     right = ct.gather(
         src,
         (c, h, offsets+1),
-        padding_value=0,
     ).astype(ct.int16)
 
     # 0 -1  0

@@ -7,7 +7,7 @@
 #include "../../support/support.hpp"
 
 #define PRINT_STATS
-#define LAUNCH_CUTILE
+// #define LAUNCH_TRITON
 
 #if defined(LAUNCH_CPP)
 void softmax_per_row(float *input, float *out, const int R, const int C);
@@ -27,10 +27,10 @@ extern "C" void softmax_per_row(float *A, int sizeA1, int sizeA2, int stideA1,
 
 #endif
 
-constexpr size_t N_REPEAT = 100;
+constexpr size_t N_REPEAT = 1000;
 
-constexpr int N_COLS = 16;
-constexpr int N_ROWS = 16;
+constexpr int N_COLS = 1024;
+constexpr int N_ROWS = 512;
 
 int main() {
   std::array<float, N_COLS * N_ROWS> input;

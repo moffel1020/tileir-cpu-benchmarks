@@ -29,16 +29,16 @@ extern "C" void warp(int8_t *in, uint32_t sizeI1, uint32_t sizeI2,
 
 #endif
 
-constexpr size_t N_REPEAT = 100;
+constexpr size_t N_REPEAT = 1000;
 
 constexpr size_t C = 3;
-constexpr size_t H = 512;
-constexpr size_t W = 512;
+constexpr size_t H = 2048;
+constexpr size_t W = 2048;
 
 int main() {
-  std::array<int8_t, C * H * W> in;
-  std::array<int16_t, H * W> off;
-  std::array<int8_t, C * H * W> out;
+  static std::array<int8_t, C * H * W> in;
+  static std::array<int16_t, H * W> off;
+  static std::array<int8_t, C * H * W> out;
 
   std::random_device rd;
   std::mt19937 gen(rd());
@@ -47,8 +47,9 @@ int main() {
 
   std::uniform_int_distribution<int8_t> distInt(-128, 127);
   std::uniform_int_distribution<int8_t> distFrac(0, 127);
-  std::generate(off.begin(), off.end(),
-                [&]() { return (distInt(gen) << 8) | distFrac(gen); });
+  std::generate(off.begin(), off.end(), [&]() {
+    return (static_cast<int32_t>(distInt(gen)) << 8) | distFrac(gen);
+  });
 
   std::fill(out.begin(), out.end(), 0);
 

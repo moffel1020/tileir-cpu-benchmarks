@@ -89,7 +89,7 @@ if __name__ == "__main__":
 
 def write_resize(file_path: str):
     C, H, W = 3, 512, 512
-    BLOCK_SIZE_W = 64
+    BLOCK_SIZE_W = 16
 
     src_arr = torch.ones((C, H, W), dtype=torch.int8, device='cpu')
     out = torch.empty((C, 2 * H, 2 * W), dtype=torch.int8, device='cpu')

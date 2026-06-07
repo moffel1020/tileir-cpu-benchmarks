@@ -6,7 +6,7 @@
 #include "../../support/support.hpp"
 
 #define PRINT_STATS
-#define LAUNCH_CUTILE
+#define LAUNCH_CPP
 
 #if defined(LAUNCH_CPP)
 #include "sharpen.hpp"
@@ -28,17 +28,17 @@ extern "C" void sharpen_3x3(uint8_t *in, uint32_t sizeI1, uint32_t sizeI2,
 
 #endif
 
-constexpr size_t N_REPEAT = 100;
+constexpr size_t N_REPEAT = 1000;
 
 constexpr size_t C = 3;
-constexpr size_t H = 512;
-constexpr size_t W = 512;
+constexpr size_t H = 2048;
+constexpr size_t W = 2048;
 
 int main() {
   // TODO: probs broken kernels
 
-  std::array<uint8_t, C * H * W> in;
-  std::array<uint8_t, C * H * W> out;
+  static std::array<uint8_t, C * H * W> in;
+  static std::array<uint8_t, C * H * W> out;
 
   std::random_device rd;
   std::mt19937 gen(rd());
@@ -53,10 +53,12 @@ int main() {
 #endif
 
 #ifdef LAUNCH_TRITON
+  constexpr size_t BLOCK_W = 16;
+
   auto times = benchmark<N_REPEAT>([&]() noexcept {
     constexpr size_t GRID_X = H;
     constexpr size_t GRID_Y = C;
-    constexpr size_t GRID_Z = W;
+    constexpr size_t GRID_Z = W / BLOCK_W;
 
 #pragma omp parallel for collapse(3) schedule(static)
     for (size_t z = 0; z < GRID_Z; z++) {

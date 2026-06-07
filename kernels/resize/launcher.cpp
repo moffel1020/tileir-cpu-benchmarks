@@ -28,15 +28,15 @@ extern "C" void resize(int8_t *in, uint32_t sizeI1, uint32_t sizeI2,
 
 #endif
 
-constexpr size_t N_REPEAT = 100;
+constexpr size_t N_REPEAT = 1000;
 
 constexpr size_t C = 3;
 constexpr size_t H = 512;
 constexpr size_t W = 512;
 
 int main() {
-  std::array<int8_t, C * H * W> in;
-  std::array<int8_t, C *(H * 2) * (W * 2)> out;
+  static std::array<int8_t, C * H * W> in;
+  static std::array<int8_t, C *(H * 2) * (W * 2)> out;
 
   std::random_device rd;
   std::mt19937 gen(rd());

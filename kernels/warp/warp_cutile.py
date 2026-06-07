@@ -44,7 +44,7 @@ def warp_kernel(
     ct.scatter(out_arr, (pid_c, h_idx, w_idx), out, check_bounds=False)
 
 def export_warp(file_path: str):
-    C, H, W = 3, 512, 512
+    C, H, W = 3, 2048, 2048
 
     ctc.export_kernel(
         kernel=warp_kernel,
