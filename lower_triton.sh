@@ -1,6 +1,6 @@
 #!/bin/bash
 
-TTCPU_OPT=/home/thomas/repos/triton-cpu/build/cmake.linux-x86_64-cpython-3.10/bin/triton-opt
+# TTCPU_OPT=/home/thomas/repos/triton-cpu/build/cmake.linux-x86_64-cpython-3.10/bin/triton-opt
 
 $TTCPU_OPT \
         --pass-pipeline='builtin.module(

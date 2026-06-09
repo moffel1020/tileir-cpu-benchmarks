@@ -76,7 +76,7 @@ def sharpen3x3(src: torch.Tensor, block_w: int = 128):
     return out
 
 def write_sharpen_3x3(file_path: str):
-    C, H, W = 3, 512, 512
+    C, H, W = 3, 2048, 2048
     BLOCK_W = 16
 
     src = torch.ones((C, H, W), device="cpu", dtype=torch.int8)

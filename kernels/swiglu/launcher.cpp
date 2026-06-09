@@ -5,7 +5,6 @@
 
 #include "../../support/support.hpp"
 
-#define LAUNCH_CUTILE
 #define PRINT_STATS
 
 #if defined(LAUNCH_CPP)
@@ -26,7 +25,7 @@ extern "C" void swiglu_fwd(float *gate, int sizeG1, int sizeG2, int strideG1,
                            uint64_t gridX, uint64_t gridY, uint64_t gridZ);
 #endif
 
-constexpr size_t N_REPEAT = 100;
+constexpr size_t N_REPEAT = 500;
 
 constexpr size_t H = 512;
 constexpr size_t W = 1024;

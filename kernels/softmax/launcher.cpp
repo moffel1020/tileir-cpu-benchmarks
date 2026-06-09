@@ -27,7 +27,7 @@ extern "C" void softmax_per_row(float *A, int sizeA1, int sizeA2, int stideA1,
 
 #endif
 
-constexpr size_t N_REPEAT = 1000;
+constexpr size_t N_REPEAT = 500;
 
 constexpr int N_COLS = 1024;
 constexpr int N_ROWS = 512;

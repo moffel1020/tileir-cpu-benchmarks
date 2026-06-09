@@ -50,7 +50,7 @@ def sharpen_3x3(src, out, W: ct.Constant[int]):
     )
 
 def export_sharpen(file_path: str):
-    C, H, W = 3, 512, 512
+    C, H, W = 3, 2048, 2048
 
     ctc.export_kernel(
         kernel=sharpen_3x3,

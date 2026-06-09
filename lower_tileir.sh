@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CUDA_TILE_OPT=/home/thomas/repos/cuda-tile-cpu/build/bin/cuda-tile-opt
+# CUDA_TILE_OPT=/home/thomas/repos/cuda-tile-cpu/build/bin/cuda-tile-opt
 
 $CUDA_TILE_OPT \
     --canonicalize --cse \
@@ -9,7 +9,7 @@ $CUDA_TILE_OPT \
     --convert-elementwise-to-linalg \
     --linalg-fold-into-elementwise \
     --canonicalize --cse \
-    --cuda-tile-cpu-tile-and-fuse-into-store="tile-sizes=32" \
+    --cuda-tile-cpu-tile-and-fuse-into-store="tile-sizes=16" \
     --canonicalize --cse \
     --eliminate-empty-tensors \
     --cuda-tile-cpu-vectorize-linalg \

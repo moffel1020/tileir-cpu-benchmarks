@@ -5,7 +5,6 @@
 
 #include "../../support/support.hpp"
 
-#define LAUNCH_CUTILE
 #define PRINT_STATS
 
 #if defined(LAUNCH_CPP)
@@ -29,7 +28,7 @@ extern "C" void warp(int8_t *in, uint32_t sizeI1, uint32_t sizeI2,
 
 #endif
 
-constexpr size_t N_REPEAT = 1000;
+constexpr size_t N_REPEAT = 500;
 
 constexpr size_t C = 3;
 constexpr size_t H = 2048;

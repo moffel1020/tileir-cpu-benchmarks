@@ -30,7 +30,7 @@ extern "C" void layernorm_fwd(float *X, int sizeX1, int sizeX2, int strideX1,
                               uint64_t gridZ);
 #endif
 
-constexpr size_t N_REPEAT = 1000;
+constexpr size_t N_REPEAT = 2000;
 
 constexpr size_t M = 1024;
 constexpr size_t N = 4096;

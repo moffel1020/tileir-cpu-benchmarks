@@ -6,7 +6,6 @@
 #include "../../support/support.hpp"
 
 #define PRINT_STATS
-#define LAUNCH_CPP
 
 #if defined(LAUNCH_CPP)
 #include "sharpen.hpp"
@@ -28,7 +27,7 @@ extern "C" void sharpen_3x3(uint8_t *in, uint32_t sizeI1, uint32_t sizeI2,
 
 #endif
 
-constexpr size_t N_REPEAT = 1000;
+constexpr size_t N_REPEAT = 500;
 
 constexpr size_t C = 3;
 constexpr size_t H = 2048;
