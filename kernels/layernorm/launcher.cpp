@@ -69,7 +69,7 @@ int main() {
       for (size_t y = 0; y < GRID_Y; y++) {
         for (size_t x = 0; x < GRID_X; x++) {
           _layer_norm_fwd_fused(X.data(), Y.data(), W.data(), B.data(),
-                                mean.data(), rstd.data(), 1, N, x, y, z, GRID_X,
+                                mean.data(), rstd.data(), N, N, x, y, z, GRID_X,
                                 GRID_Y, GRID_Z);
         }
       }

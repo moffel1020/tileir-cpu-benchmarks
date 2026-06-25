@@ -9,18 +9,12 @@ def swiglu_fwd(
     gate,
     up,
     output,
-    TILE_SIZE: ConstInt,
+    WIDTH: ConstInt,
 ):
-    """SwiGLU forward: silu(gate) * up using gather/scatter.
-
-    Each block processes one row. Uses flush_to_zero and approximate
-    reciprocal for fast sigmoid computation on Blackwell.
-    """
     bid = ct.bid(0)
-    offsets = ct.arange(TILE_SIZE, dtype=ct.int32)
 
-    gate_tile = ct.gather(gate, (bid, offsets), check_bounds=True, padding_value=0.0)
-    up_tile = ct.gather(up, (bid, offsets), check_bounds=True, padding_value=0.0)
+    gate_tile = ct.load(gate, (bid, 0), (1, WIDTH))
+    up_tile = ct.load(up, (bid, 0), (1, WIDTH))
 
     # Compute sigmoid in float32 for numerical stability
     gate_f32 = ct.astype(gate_tile, ct.float32)
@@ -31,7 +25,7 @@ def swiglu_fwd(
     silu_gate = ct.mul(gate_f32, sig, flush_to_zero=True)
     result = ct.astype(silu_gate, gate.dtype) * up_tile
 
-    ct.scatter(output, (bid, offsets), result, check_bounds=True)
+    ct.store(output, (bid, 0), result)
 
 def export_swiglu_fwd(file_path: str):
     arr_dtype = ct.float32

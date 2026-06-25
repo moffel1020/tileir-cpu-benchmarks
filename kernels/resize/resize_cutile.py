@@ -14,9 +14,6 @@ def resize_kernel(
     pid_h = ct.bid(0)
     pid_c = ct.bid(1)
 
-    dst_height = 2 * height
-    dst_width = 2 * width
-
     hw_fl = 7
 
     h_idx = pid_h
@@ -29,52 +26,29 @@ def resize_kernel(
 
     y1 = ct.minimum(y0 + 1, height - 1)
 
-    for off in range(0, width * 2, BLOCK_SIZE_W):
-        w_idx = off + ct.arange(BLOCK_SIZE_W, dtype=ct.int32)
+    w_idx = ct.arange(width * 2, dtype=ct.int32)
 
-        input_x = w_idx << (hw_fl - 1)
-        x0 = input_x >> hw_fl
+    input_x = w_idx << (hw_fl - 1)
+    x0 = input_x >> hw_fl
 
-        y0x0 = ct.gather(
-            src_ptr,
-            (pid_c, y0, x0),
-            padding_value=0,
-        ).astype(ct.int16)
+    y0x0 = ct.gather(src_ptr, (pid_c, y0, x0), padding_value=0).astype(ct.int16)
+    y1x0 = ct.gather(src_ptr, (pid_c, y1, x0), padding_value=0).astype(ct.int16)
 
-        y1x0 = ct.gather(
-            src_ptr,
-            (pid_c, y1, x0),
-            padding_value=0,
-        ).astype(ct.int16)
+    x1 = ct.minimum(x0 + 1, width - 1)
 
-        x1 = ct.minimum(x0 + 1, width - 1)
+    y0x1 = ct.gather(src_ptr, (pid_c, y0, x1) ,padding_value=0).astype(ct.int16)
+    y1x1 = ct.gather(src_ptr, (pid_c, y1, x1) ,padding_value=0).astype(ct.int16)
 
-        y0x1 = ct.gather(
-            src_ptr,
-            (pid_c, y0, x1),
-            padding_value=0,
-        ).astype(ct.int16)
+    w1_lambda = input_x - (x0 << hw_fl)
+    w0_lambda = factor - w1_lambda
 
-        y1x1 = ct.gather(
-            src_ptr,
-            (pid_c, y1, x1),
-            padding_value=0,
-        ).astype(ct.int16)
+    sum1 = (y0x0 * w0_lambda + y0x1 * w1_lambda) >> hw_fl
+    sum2 = (y1x0 * w0_lambda + y1x1 * w1_lambda) >> hw_fl
+    sum_ = (sum1 * h0_lambda + sum2 * h1_lambda) >> hw_fl
 
-        w1_lambda = input_x - (x0 << hw_fl)
-        w0_lambda = factor - w1_lambda
+    sum_ = sum_.astype(ct.int8)
 
-        sum1 = (y0x0 * w0_lambda + y0x1 * w1_lambda) >> hw_fl
-        sum2 = (y1x0 * w0_lambda + y1x1 * w1_lambda) >> hw_fl
-        sum_ = (sum1 * h0_lambda + sum2 * h1_lambda) >> hw_fl
-
-        sum_ = sum_.astype(ct.int8)
-
-        ct.scatter(
-            out_ptr,
-            (pid_c, h_idx, w_idx),
-            sum_,
-        )
+    ct.scatter(out_ptr, (pid_c, h_idx, w_idx), sum_)
 
 def export_resize(file_path: str):
     C, H, W = 3, 512, 512

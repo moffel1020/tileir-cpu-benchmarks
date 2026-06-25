@@ -32,4 +32,4 @@ then `python3 export_triton_kernels`
 ## Acknowledgements
 Most triton and C++ kernels where taken from https://github.com/Terapines/AI-Benchmark/
 
-The cuTile swiglu implementation is from https://github.com/aghilann/bastile/
+The cuTile swiglu implementation is adapted from https://github.com/aghilann/bastile/

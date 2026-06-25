@@ -57,7 +57,7 @@ def layernorm_fwd(X, W, B, Y, Mean, Rstd, eps: ct.Constant[float], TILE_N: Const
 
 def export_layernorm_fwd(file_path: str):
     arr_dtype = ct.float32
-    TILE_N = 16
+    TILE_N = 32
     M, N = 1024, 4096
     eps = 1e-5
 
