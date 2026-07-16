@@ -30,6 +30,6 @@ Make sure pytorch (cpu), numpy and triton-cpu are installed for python.
 then `python3 export_triton_kernels`
 
 ## Acknowledgements
-Most triton and C++ kernels where taken from https://github.com/Terapines/AI-Benchmark/
+Most triton and C++ kernels were taken from https://github.com/Terapines/AI-Benchmark/
 
 The cuTile swiglu implementation is adapted from https://github.com/aghilann/bastile/
